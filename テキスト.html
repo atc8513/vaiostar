@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>博博來伯地図</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+      color: white;
+      font-family: sans-serif;
+    }
+    .screen {
+      display: none;
+      height: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      padding: 2em;
+    }
+    #screen1 {
+      display: block;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+    }
+    p {
+      font-size: 1.2em;
+      margin-bottom: 1.5em;
+    }
+    .yellow-text {
+      color: yellow;
+      font-size: 1.1em;
+      margin-bottom: 1em;
+    }
+    .red-text {
+      color: red;
+      font-size: 1.2em;
+      margin-top: 1em;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 0.8em 1.5em;
+      background: white;
+      color: black;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #map {
+      width: 100%;
+      height: 60vh;
+      border: none;
+      margin-top: 1em;
+    }
+    .version {
+      font-size: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    .note {
+      font-size: 1em;
+      margin-top: 1em;
+      color: #ccc;
+    }
+    .code {
+      font-size: 1.5em;
+      margin: 0.5em 0 1em;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- スクリーン1 -->
+  <div id="screen1" class="screen">
+    <h1>博博來伯地図へようこそ</h1>
+<h2>今話題の紹介制地図サービス<h2/>
+    <p>サイトを正しく表示するため、<br>権限の要求にはすべて「許可」を押して下さい。</p>
+    <div class="yellow-text">
+      我々は博博來伯地図を色々な方に使って頂きたいと考えております
+    </div>
+    <button id="nextBtn">次の画面に進む</button>
+    <div class="red-text">
+      サービス開始 2024.02.29<br>お問い合わせコード運用開始2024.04.13<br>㊗︎愛用者１０００人突破! 2024.11.17<br>㊗︎愛用者２０００人突破! 2025.03.19
+    </div>
+  </div>
+
+  <!-- スクリーン2 -->
+  <div id="screen2" class="screen">
+    <div class="version">博博來伯地図ver.2025</div>
+    <h1>お問い合わせコード</h1>
+    <div id="code" class="code">コード生成中...</div>
+    <p class="note">
+      お問い合わせコードを友達に紹介することで、あなたの人生が少し変わるかもしれません!
+    </p>
+    <iframe
+      id="map"
+      src="https://maps.google.com/maps?q=原宿,東京&z=15&output=embed"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+
+  <script>
+    // 36進数変換関数
+    function toBase36(num) {
+      const sign = num < 0 ? '-' : '';
+      num = Math.abs(num);
+      const intPart  = Math.floor(num);
+      const fracPart = num - intPart;
+      const intStr   = intPart.toString(36);
+      let frac = '';
+      let x = fracPart;
+      for (let i = 0; i < 8; i++) {
+        x *= 36;
+        const digit = Math.floor(x);
+        frac += digit.toString(36);
+        x -= digit;
+      }
+      return sign + intStr + '.' + frac;
+    }
+
+    const btn    = document.getElementById('nextBtn');
+    const s1     = document.getElementById('screen1');
+    const s2     = document.getElementById('screen2');
+    const codeEl = document.getElementById('code');
+    const mapEl  = document.getElementById('map');
+
+    btn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        codeEl.textContent = 'このブラウザは対応していません。';
+        switchScreen();
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat    = pos.coords.latitude;
+        const lon    = pos.coords.longitude;
+        const lat36  = toBase36(lat);
+        const lon36  = toBase36(lon);
+        codeEl.textContent = `${lat36}#${lon36}`;
+        // 地図を自分の位置に更新
+        mapEl.src = `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+        switchScreen();
+      }, err => {
+        codeEl.textContent = '全ての権限を許可して下さい。';
+        switchScreen();
+      }, { enableHighAccuracy: true });
+    });
+
+    function switchScreen() {
+      s1.style.display = 'none';
+      s2.style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
